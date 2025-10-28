@@ -1,1 +1,9 @@
 @import "tailwindcss";
+@import "./fonts.css";
+
+:root { --font-sans: "Sohne", system-ui, sans-serif; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -1,20 +1,19 @@
 ---
 const nav = [
-  { href: "/", label: "Home" },
-  { href: "/works", label: "Works" },
-  { href: "/about", label: "About" },
-  { href: "/exhibitions", label: "Exhibitions" },
-  { href: "/contact", label: "Contact" },
+  { href: "/#works", label: "Works" },
+  { href: "/#about", label: "About" },
+  { href: "/#exhibitions", label: "Exhibitions" },
+  { href: "/#contact", label: "Contact" },
 ]
 ---
 
-<header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur z-50">
-  <div class="mx-auto max-w-6xl px-6 py-5 flex justify-between items-center">
-    <a href="/" class="font-medium tracking-wide">Atelier Buelens</a>
-    <nav class="space-x-6 text-sm">
+<header class="fixed top-0 left-0 right-0 z-50 text-white">
+  <div class="mx-auto max-w-6xl px-6 py-6 flex items-center justify-between">
+    <a href="/" class="font-light text-base tracking-tight hover:opacity-80 transition-opacity"> Atelier Buelens </a>
+    <nav class="flex items-center gap-8 text-sm font-light tracking-wide">
       {
         nav.map(item => (
-          <a href={item.href} class="hover:opacity-60">
+          <a href={item.href} class="hover:opacity-60 transition-opacity">
             {item.label}
           </a>
         ))

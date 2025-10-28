@@ -1,9 +1,129 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro"
+import { getCollection, type CollectionEntry } from "astro:content"
+
+type WorkEntry = CollectionEntry<"works">
+type ExhibitionEntry = CollectionEntry<"exhibitions">
+
+const works: WorkEntry[] = (await getCollection("works")).sort(
+  (a: WorkEntry, b: WorkEntry) => (a.data.order ?? 0) - (b.data.order ?? 0)
+)
+
+const exhibitions: ExhibitionEntry[] = await getCollection("exhibitions")
 ---
 
 <BaseLayout title="Atelier Buelens">
-  <section class="h-screen flex items-center justify-center text-center">
-    <h1 class="text-3xl md:text-5xl font-light tracking-tight">Minimal furniture, built with precision.</h1>
+  <!-- HERO -->
+  <section
+    id="home"
+    class="relative h-screen flex items-center justify-center text-center bg-cover bg-center bg-no-repeat"
+    style="background-image: url('/works/ramp-coffee/01.jpg');"
+  >
+    <div class="absolute inset-0 bg-black/30"></div>
+    <h1 class="relative z-10 text-3xl md:text-5xl font-light tracking-tight text-white drop-shadow-md">
+      Minimal furniture, built with precision.
+    </h1>
+  </section>
+
+  <!-- WORKS -->
+  <section id="works" class="mx-auto max-w-6xl px-6 pt-28 pb-16 scroll-mt-24">
+    <header class="mb-8">
+      <h2 class="sr-only">Works</h2>
+    </header>
+
+    {
+      works.length > 0 ? (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {works.map(({ data }: { data: WorkEntry["data"] }) => (
+            <figure class="group block">
+              <div class="aspect-[4/3] w-full overflow-hidden">
+                <img
+                  src={data.cover}
+                  alt={data.title}
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <figcaption class="mt-2 flex items-center justify-between text-sm">
+                <span class="group-hover:opacity-70">{data.title}</span>
+                {data.photographer && <span class="opacity-60">Photo: {data.photographer}</span>}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      ) : (
+        <p class="opacity-60">Works coming soon.</p>
+      )
+    }
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="mx-auto max-w-6xl px-6 pt-28 pb-20 scroll-mt-24">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+      <img
+        src="/about/portrait.jpg"
+        alt="Portrait"
+        class="w-full h-auto object-cover"
+        loading="lazy"
+        decoding="async"
+      />
+      <div>
+        <p class="leading-relaxed mb-6">
+          Mijn werk combineert ambacht met mijn achtergrond als ingenieur. Het startpunt is een pure geometrische vorm;
+          materialen worden vormelijk samengebracht, met aandacht voor esthetiek en functionaliteit. Schetsen,
+          sterkteberekeningen en simulaties maken deel uit van het proces. Tijdens de productie waak ik over het
+          houtwerk, terwijl staalwerk wordt uitbesteed.
+        </p>
+        <blockquote class="italic opacity-80">
+          “Ik wil de grens opzoeken tussen spanning en rust, tussen sterkte en elegantie.”
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXHIBITIONS -->
+  <section id="exhibitions" class="mx-auto max-w-3xl px-6 pt-28 pb-16 scroll-mt-24">
+    <h2 class="text-xl mb-4">Exhibitions</h2>
+
+    {
+      exhibitions.length > 0 ? (
+        <ul class="space-y-2">
+          {exhibitions.map(({ data }: { data: ExhibitionEntry["data"] }) => (
+            <li class="flex items-baseline justify-between border-b py-3">
+              <div>
+                <p>{data.title}</p>
+                <p class="text-sm opacity-80">
+                  {data.venue}
+                  {data.city ? `, ${data.city}` : ""}
+                </p>
+              </div>
+              <div class="text-sm">
+                {new Date(data.start).toLocaleDateString()}
+                {data.end ? ` – ${new Date(data.end).toLocaleDateString()}` : ""}
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="opacity-60">Exhibitions coming soon.</p>
+      )
+    }
+  </section>
+
+  <!-- CONTACT (centered, no title) -->
+  <section
+    id="contact"
+    class="flex flex-col items-center justify-center text-center py-32 border-t border-black/10 scroll-mt-24"
+  >
+    <div class="space-y-2 text-base md:text-lg leading-relaxed">
+      <p>
+        <a href="mailto:info@buelens.com" class="underline hover:opacity-60 transition-opacity underline-offset-4">
+          info@buelens.com
+        </a>
+      </p>
+      <p>+32 47 837 18 88</p>
+      <p>Azalealaan 37<br />1030&nbsp;Brussel</p>
+    </div>
   </section>
 </BaseLayout>
