@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro"
 import { getCollection, type CollectionEntry } from "astro:content"
+import Quote from "../components/Quote.astro"
 
 type WorkEntry = CollectionEntry<"works">
 type ExhibitionEntry = CollectionEntry<"exhibitions">
@@ -58,6 +59,9 @@ const exhibitions: ExhibitionEntry[] = await getCollection("exhibitions")
     }
   </section>
 
+  <!-- QUOTE -->
+  <Quote />
+
   <!-- ABOUT -->
   <section id="about" class="mx-auto max-w-6xl px-6 pt-28 pb-20 scroll-mt-24">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
@@ -75,9 +79,6 @@ const exhibitions: ExhibitionEntry[] = await getCollection("exhibitions")
           sterkteberekeningen en simulaties maken deel uit van het proces. Tijdens de productie waak ik over het
           houtwerk, terwijl staalwerk wordt uitbesteed.
         </p>
-        <blockquote class="italic opacity-80">
-          “Ik wil de grens opzoeken tussen spanning en rust, tussen sterkte en elegantie.”
-        </blockquote>
       </div>
     </div>
   </section>
