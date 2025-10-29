@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro"
 import { getCollection, type CollectionEntry } from "astro:content"
 import Quote from "../components/Quote.astro"
+import FullscreenWorkSlider from "../components/FullscreenWorkSlider.tsx"
 
 type WorkEntry = CollectionEntry<"works">
 type ExhibitionEntry = CollectionEntry<"exhibitions">
@@ -11,10 +12,19 @@ const works: WorkEntry[] = (await getCollection("works")).sort(
 )
 
 const exhibitions: ExhibitionEntry[] = await getCollection("exhibitions")
+
+const sliderItems = works
+  .filter(w => !!w.data.cover)
+  .map(w => ({
+    id: w.slug,
+    title: w.data.title,
+    image: w.data.cover,
+    href: `/works/${w.slug}`,
+  }))
 ---
 
 <BaseLayout title="Atelier Buelens">
-  <!-- HERO -->
+  <!-- HERO (kept) -->
   <section
     id="home"
     class="relative h-screen flex items-center justify-center text-center bg-cover bg-center bg-no-repeat"
@@ -26,35 +36,15 @@ const exhibitions: ExhibitionEntry[] = await getCollection("exhibitions")
     </h1>
   </section>
 
-  <!-- WORKS -->
-  <section id="works" class="mx-auto max-w-6xl px-6 pt-28 pb-16 scroll-mt-24">
-    <header class="mb-8">
-      <h2 class="sr-only">Works</h2>
-    </header>
-
+  <!-- WORKS: slider only -->
+  <section id="works" class="scroll-mt-24">
     {
-      works.length > 0 ? (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {works.map(({ data }: { data: WorkEntry["data"] }) => (
-            <figure class="group block">
-              <div class="aspect-[4/3] w-full overflow-hidden">
-                <img
-                  src={data.cover}
-                  alt={data.title}
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-              <figcaption class="mt-2 flex items-center justify-between text-sm">
-                <span class="group-hover:opacity-70">{data.title}</span>
-                {data.photographer && <span class="opacity-60">Photo: {data.photographer}</span>}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+      sliderItems.length > 0 ? (
+        <FullscreenWorkSlider client:load items={sliderItems} autoMs={4000} />
       ) : (
-        <p class="opacity-60">Works coming soon.</p>
+        <div class="mx-auto max-w-6xl px-6 py-24">
+          <p class="opacity-60">Works coming soon.</p>
+        </div>
       )
     }
   </section>
@@ -74,10 +64,10 @@ const exhibitions: ExhibitionEntry[] = await getCollection("exhibitions")
       />
       <div>
         <p class="leading-relaxed mb-6">
-          Mijn werk combineert ambacht met mijn achtergrond als ingenieur. Het startpunt is een pure geometrische vorm;
-          materialen worden vormelijk samengebracht, met aandacht voor esthetiek en functionaliteit. Schetsen,
-          sterkteberekeningen en simulaties maken deel uit van het proces. Tijdens de productie waak ik over het
-          houtwerk, terwijl staalwerk wordt uitbesteed.
+          My work combines craftsmanship with my background as an engineer. It begins with a pure geometric form;
+          materials are brought together in a way that balances aesthetics and functionality. Sketches, strength
+          calculations, and simulations are part of the process. During production, I oversee the woodwork, while the
+          steelwork is outsourced.
         </p>
       </div>
     </div>
