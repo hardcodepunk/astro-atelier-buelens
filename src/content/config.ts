@@ -26,4 +26,14 @@ const exhibitions = defineCollection({
   }),
 })
 
-export const collections = { works, exhibitions }
+const posts = defineCollection({
+  type: "content",
+  schema: z.object({
+    title: z.string(),
+    date: z.string(),
+    cover: z.string().optional(),
+    excerpt: z.string().optional(),
+  }),
+})
+
+export const collections = { works, exhibitions, posts }
