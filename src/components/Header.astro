@@ -7,10 +7,12 @@ const nav = [
 ]
 ---
 
-<header class="fixed top-0 left-0 right-0 z-50 text-white">
-  <div class="mx-auto max-w-6xl px-6 py-6 flex items-center justify-between">
+<header id="site-header" class="fixed top-0 left-0 right-0 z-50 text-white transition-all duration-300">
+  <div class="mx-auto max-w-6xl px-6 py-6 flex items-center justify-between relative">
     <a href="/" class="font-light text-base tracking-tight hover:opacity-80 transition-opacity"> Atelier Buelens </a>
-    <nav class="flex items-center gap-8 text-sm font-light tracking-wide">
+
+    <!-- Desktop -->
+    <nav class="hidden md:flex items-center gap-8 text-sm font-light tracking-wide">
       {
         nav.map(item => (
           <a href={item.href} class="hover:opacity-60 transition-opacity">
@@ -19,5 +21,102 @@ const nav = [
         ))
       }
     </nav>
+
+    <!-- Mobile button -->
+    <button
+      id="menu-toggle"
+      class="md:hidden relative z-1000 w-6 h-5 flex flex-col justify-between focus:outline-none"
+      aria-label="Toggle menu"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+    >
+      <span class="bar block w-6 h-0.5 bg-white transition-all duration-300 origin-center"></span>
+      <span class="bar block w-6 h-0.5 bg-white transition-all duration-300 origin-center"></span>
+      <span class="bar block w-6 h-0.5 bg-white transition-all duration-300 origin-center"></span>
+    </button>
+
+    <!-- Mobile overlay -->
+    <div
+      id="mobile-menu"
+      class="fixed inset-0 h-screen z-999 flex flex-col items-center justify-center gap-10
+         text-2xl font-light tracking-wide bg-white text-black
+         opacity-0 pointer-events-none transition-opacity duration-300"
+    >
+      {
+        nav.map(item => (
+          <a href={item.href} class="hover:opacity-60 transition-opacity">
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
   </div>
 </header>
+
+<script>
+  import { initHeaderScroll } from "../utils/headerScroll"
+  initHeaderScroll()
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("menu-toggle")
+    const menu = document.getElementById("mobile-menu")
+    if (!btn || !menu) return
+
+    const openMenu = () => {
+      btn.classList.add("open")
+      btn.setAttribute("aria-expanded", "true")
+      menu.classList.remove("opacity-0", "pointer-events-none")
+      menu.classList.add("opacity-100", "pointer-events-auto")
+      document.documentElement.classList.add("overflow-hidden")
+    }
+
+    const closeMenu = () => {
+      btn.classList.remove("open")
+      btn.setAttribute("aria-expanded", "false")
+      menu.classList.remove("opacity-100", "pointer-events-auto")
+      menu.classList.add("opacity-0", "pointer-events-none")
+      document.documentElement.classList.remove("overflow-hidden")
+    }
+
+    btn.addEventListener("click", () => {
+      const isOpen = btn.classList.contains("open")
+      isOpen ? closeMenu() : openMenu()
+    })
+
+    // close on link click
+    menu.addEventListener("click", e => {
+      const target = e.target as HTMLElement | null
+      if (target && target.tagName === "A") {
+        closeMenu()
+      }
+    })
+  })
+</script>
+
+<style>
+  /* Default bars = white at top (transparent header) */
+  #site-header .bar {
+    background-color: white;
+  }
+
+  /* When header becomes solid on scroll up, bars turn black */
+  #site-header.header-solid .bar {
+    background-color: black;
+  }
+
+  /* When the mobile menu is open, keep bars black (cross) */
+  #menu-toggle.open .bar {
+    background-color: black;
+  }
+
+  /* Cross transform */
+  #menu-toggle.open .bar:nth-child(1) {
+    transform: rotate(45deg) translateY(6px);
+  }
+  #menu-toggle.open .bar:nth-child(2) {
+    opacity: 0;
+  }
+  #menu-toggle.open .bar:nth-child(3) {
+    transform: rotate(-45deg) translateY(-6px);
+  }
+</style>
