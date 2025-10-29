@@ -20,14 +20,14 @@ export default function FullscreenWorkSlider({ items, autoMs = 4000 }: Props) {
   const next = () => setIndex(i => (i + 1) % items.length)
   const prev = () => setIndex(i => (i - 1 + items.length) % items.length)
 
-  // Autoplay (instant change, no transition)
+  // Autoplay
   useEffect(() => {
     if (items.length <= 1) return
     const id = window.setInterval(() => next(), autoMs)
     return () => clearInterval(id)
   }, [autoMs, items.length])
 
-  // Swipe support
+  // Swipe
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
   }
@@ -41,49 +41,51 @@ export default function FullscreenWorkSlider({ items, autoMs = 4000 }: Props) {
   const active = items[index]
 
   return (
-    <section className="bg-white text-black py-16">
-      {/* Cinematic frame */}
+    <section className="bg-white text-black py-16 px-6 md:px-10">
       <div
-        className="relative mx-auto w-full max-w-6xl aspect-[16/7] overflow-hidden bg-black"
-        style={{ aspectRatio: "16 / 7" }}
+        className="relative mx-auto w-full max-w-6xl aspect-[16/7] overflow-hidden rounded-2xl"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* Main image */}
+        {/* Image */}
         <img
           key={active.id}
           src={active.image}
           alt={active.alt || active.title}
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-center rounded-2xl"
         />
 
-        {/* Bottom-centered overlay */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white text-center">
+        {/* Title + button at bottom center */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-center text-white">
           <h2 className="text-lg md:text-2xl font-light tracking-tight mb-3 drop-shadow">{active.title}</h2>
           <a
             href={active.href}
-            className="inline-block border border-white/60 hover:border-white transition px-8 py-2 text-xs uppercase tracking-widest"
+            className="inline-block rounded-full border border-white/60 hover:border-white transition px-8 py-2 text-xs uppercase tracking-widest bg-white/10 backdrop-blur-sm"
           >
             View
           </a>
         </div>
 
-        {/* Subtle gradient for depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none" />
+        {/* Soft gradient for readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 rounded-2xl pointer-events-none" />
       </div>
 
-      {/* Navigation thumbnails */}
-      <div className="mt-10 flex justify-center gap-6 md:gap-8">
+      {/* Thumbnails */}
+      <div className="mt-10 flex justify-center gap-6 md:gap-8 flex-wrap">
         {items.map((it, i) => {
           const activeThumb = i === index
           return (
             <button key={it.id} onClick={() => setIndex(i)} className="flex flex-col items-center group">
               <div
-                className={`overflow-hidden rounded-sm border transition-all duration-300 ${
+                className={`overflow-hidden rounded-md border transition-all duration-300 ${
                   activeThumb ? "border-black" : "border-transparent group-hover:border-black/30"
                 }`}
               >
-                <img src={it.image} alt={it.alt || it.title} className="w-20 h-14 md:w-28 md:h-20 object-cover" />
+                <img
+                  src={it.image}
+                  alt={it.alt || it.title}
+                  className="w-20 h-14 md:w-28 md:h-20 object-cover rounded-md"
+                />
               </div>
               <span
                 className={`mt-2 text-[10px] md:text-xs uppercase tracking-widest ${
