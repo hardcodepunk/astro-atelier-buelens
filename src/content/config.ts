@@ -26,7 +26,7 @@ const exhibitions = defineCollection({
   }),
 })
 
-const posts = defineCollection({
+const journal = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
@@ -36,4 +36,4 @@ const posts = defineCollection({
   }),
 })
 
-export const collections = { works, exhibitions, posts }
+export const collections = { works, exhibitions, journal }

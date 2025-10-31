@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro"
 import { getCollection, type CollectionEntry } from "astro:content"
 import Quote from "../components/Quote.astro"
 import FullscreenWorkSlider from "../components/FullscreenWorkSlider.tsx"
+import JournalList from "../components/JournalList.astro"
 
 type WorkEntry = CollectionEntry<"works">
 type ExhibitionEntry = CollectionEntry<"exhibitions">
@@ -102,36 +103,7 @@ const sliderItems = works
     }
   </section>
 
-  <!-- JOURNAL -->
-  <section id="journal" class="mx-auto max-w-6xl px-6 pt-28 pb-20 scroll-mt-24">
-    <h2 class="text-xl mb-8">Journal</h2>
-
-    {
-      (await getCollection("posts")).length > 0 ? (
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {(await getCollection("posts"))
-            .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
-            .map(({ data }) => (
-              <article class="group block">
-                {data.cover && (
-                  <div class="aspect-video w-full overflow-hidden mb-3">
-                    <img
-                      src={data.cover}
-                      alt={data.title}
-                      class="w-full h-full object-cover group-hover:opacity-90 transition rounded-2xl"
-                    />
-                  </div>
-                )}
-                <h3 class="font-light text-lg mb-1 group-hover:opacity-70 transition">{data.title}</h3>
-                <p class="text-sm opacity-70">{data.excerpt}</p>
-              </article>
-            ))}
-        </div>
-      ) : (
-        <p class="opacity-60">Journal posts coming soon.</p>
-      )
-    }
-  </section>
+  <JournalList />
 
   <!-- CONTACT (centered, no title) -->
   <section
