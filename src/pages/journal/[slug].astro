@@ -1,8 +1,21 @@
 ---
+import BaseLayout from "../../layouts/BaseLayout.astro"
 import { sanityClient } from "../../utils/sanityClient"
 import { urlFor } from "../../utils/sanityImage"
-import BaseLayout from "../../layouts/BaseLayout.astro"
 import { toHTML } from "@portabletext/to-html"
+
+// Build-time: tell Astro which slugs to generate
+export async function getStaticPaths() {
+  const entries = await sanityClient.fetch(`
+    *[_type == "journal" && defined(slug.current)]{
+      "slug": slug.current
+    }
+  `)
+
+  return entries.map((entry: { slug: string }) => ({
+    params: { slug: entry.slug },
+  }))
+}
 
 const { slug } = Astro.params
 
@@ -20,21 +33,24 @@ const entry = await sanityClient.fetch(
 
 function formatDate(d: string | number | Date) {
   const date = new Date(d)
-  return date.toLocaleDateString("en-GB")
+  const day = String(date.getDate()).padStart(2, "0")
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const year = date.getFullYear()
+  return `${day}.${month}.${year}`
 }
 ---
 
-<BaseLayout title={entry.title}>
+<BaseLayout title={entry?.title ?? "Journal"}>
   <section class="mx-auto max-w-3xl px-6 pt-28 pb-20">
     <h1 class="text-2xl mb-3">{entry.title}</h1>
-    <p class="text-sm opacity-70 mb-6">{formatDate(entry.date)}</p>
+    {entry?.date && <p class="text-sm opacity-70 mb-6">{formatDate(entry.date)}</p>}
 
     {
-      entry.cover && (
+      entry?.cover && (
         <img src={urlFor(entry.cover).width(1600).url()} alt={entry.title} class="w-full h-auto object-cover mb-8" />
       )
     }
 
-    <article class="prose prose-neutral" set:html={toHTML(entry.content)} />
+    {entry?.content && <article class="prose prose-neutral" set:html={toHTML(entry.content)} />}
   </section>
 </BaseLayout>
