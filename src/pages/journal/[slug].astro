@@ -1,49 +1,40 @@
 ---
+import { sanityClient } from "../../utils/sanityClient"
+import { urlFor } from "../../utils/sanityImage"
 import BaseLayout from "../../layouts/BaseLayout.astro"
-import JournalList from "../../components/JournalList.astro"
-import { getCollection, type CollectionEntry } from "astro:content"
-
-type JournalEntry = CollectionEntry<"journal">
-
-export async function getStaticPaths() {
-  const journal = await getCollection("journal")
-  return journal.map(({ slug }) => ({
-    params: { slug },
-  }))
-}
+import { toHTML } from "@portabletext/to-html"
 
 const { slug } = Astro.params
-if (!slug) throw new Error("Missing slug param")
 
-// Safer filtering by slug (avoids deprecated getEntryBySlug)
-const matches = await getCollection("journal", entry => entry.slug === slug)
-const post = matches[0] as JournalEntry | undefined
-if (!post) throw new Error(`Post not found: ${slug}`)
+const entry = await sanityClient.fetch(
+  `
+  *[_type == "journal" && slug.current == $slug][0]{
+    title,
+    date,
+    cover,
+    content
+  }
+`,
+  { slug }
+)
 
-const { data } = post
-const { Content } = await post.render()
-
-const formattedDate = new Date(data.date).toLocaleDateString("nl-BE", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-})
+function formatDate(d: string | number | Date) {
+  const date = new Date(d)
+  return date.toLocaleDateString("en-GB")
+}
 ---
 
-<BaseLayout title={`${data.title} – Atelier Buelens`}>
-  <article class="mx-auto max-w-3xl px-6 pt-28 pb-24">
+<BaseLayout title={entry.title}>
+  <section class="mx-auto max-w-3xl px-6 pt-28 pb-20">
+    <h1 class="text-2xl mb-3">{entry.title}</h1>
+    <p class="text-sm opacity-70 mb-6">{formatDate(entry.date)}</p>
+
     {
-      data.cover && (
-        <img src={data.cover} alt={data.title} class="w-full rounded-2xl mb-8" loading="eager" decoding="async" />
+      entry.cover && (
+        <img src={urlFor(entry.cover).width(1600).url()} alt={entry.title} class="w-full h-auto object-cover mb-8" />
       )
     }
-    <h1 class="text-3xl md:text-4xl font-semibold tracking-tight">{data.title}</h1>
-    <p class="text-sm opacity-70 mt-2 mb-10">{formattedDate}</p>
-    <div class="prose prose-lg max-w-none leading-relaxed">
-      <Content />
-    </div>
-  </article>
 
-  <!-- Show related posts (excluding the current one) -->
-  <JournalList excludeSlug={slug} />
+    <article class="prose prose-neutral" set:html={toHTML(entry.content)} />
+  </section>
 </BaseLayout>

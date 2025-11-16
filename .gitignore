@@ -24,3 +24,11 @@ pnpm-debug.log*
 .idea/
 
 .vscode/
+
+# Sanity Studio
+atelier-buelens/node_modules
+atelier-buelens/.sanity
+atelier-buelens/dist
+atelier-buelens/.vercel
+atelier-buelens/.env
+atelier-buelens/.env.local

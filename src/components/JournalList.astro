@@ -1,98 +1,50 @@
 ---
-import { getCollection } from "astro:content"
+import { sanityClient } from "../utils/sanityClient"
+import { urlFor } from "../utils/sanityImage"
 
-const { excludeSlug = null } = Astro.props
+const entries = await sanityClient.fetch(`
+  *[_type == "journal"] | order(date desc) {
+    title,
+    slug,
+    date,
+    cover,
+    content
+  }
+`)
 
-const allPosts = (await getCollection("journal"))
-  .filter(post => post.slug !== excludeSlug)
-  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
-
-const initialCount = 3
-const increment = 3
+function formatDate(d: string | number | Date) {
+  const date = new Date(d)
+  const day = String(date.getDate()).padStart(2, "0")
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const year = date.getFullYear()
+  return `${day}.${month}.${year}`
+}
 ---
 
-<section id="journal" class="mx-auto max-w-6xl px-6 pt-28 pb-20 scroll-mt-24">
-  <h2 class="text-xl mb-8">
-    {excludeSlug ? "More from the Journal" : "Journal"}
-  </h2>
+<section id="journal" class="mx-auto max-w-6xl px-6 pt-28 pb-20">
+  <h2 class="text-xl mb-6">Journal</h2>
 
   {
-    allPosts.length > 0 ? (
-      <div id="journal-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {allPosts.map(({ slug, data }, idx) => (
-          <a
-            href={`/journal/${slug}/`}
-            class={`group block journal-item transition-opacity duration-300 ${
-              idx < initialCount ? "opacity-100" : "hidden opacity-0"
-            }`}
-            data-idx={idx}
-          >
-            {data.cover && (
-              <div class="aspect-video w-full overflow-hidden mb-3">
+    entries.length > 0 ? (
+      <ul class="space-y-8">
+        {entries.map((entry: { slug: { current: any }; cover: any; title: unknown; date: any }) => (
+          <li class="flex flex-col gap-2">
+            <a href={`/journal/${entry.slug.current}`} class="group">
+              {entry.cover && (
                 <img
-                  src={data.cover}
-                  alt={data.title}
-                  class="w-full h-full object-cover group-hover:opacity-90 transition"
-                  loading={idx < initialCount ? "eager" : "lazy"}
-                  decoding="async"
+                  src={urlFor(entry.cover).width(1200).url()}
+                  alt={entry.title}
+                  class="w-full h-auto object-cover mb-4"
                 />
-              </div>
-            )}
-            <h3 class="font-light text-lg mb-1 group-hover:opacity-70 transition">{data.title}</h3>
-            <p class="text-sm opacity-70">{data.excerpt}</p>
-          </a>
+              )}
+              <h3 class="text-lg font-light group-hover:opacity-60 transition">{entry.title}</h3>
+            </a>
+            <p class="text-sm opacity-70">{formatDate(entry.date)}</p>
+          </li>
         ))}
-      </div>
+      </ul>
     ) : (
-      <p class="opacity-60">Journal posts coming soon.</p>
-    )
-  }
-
-  {
-    allPosts.length > initialCount && (
-      <div class="flex flex-col items-center mt-12 text-sm">
-        <button
-          id="load-more"
-          class="underline hover:opacity-70 transition"
-          data-loaded={initialCount}
-          data-increment={increment}
-          data-total={allPosts.length}
-        >
-          Load more ({allPosts.length - initialCount} remaining)
-        </button>
-      </div>
+      <p class="opacity-60">Journal entries coming soon.</p>
     )
   }
 </section>
-
-<script>
-  const btn = document.getElementById("load-more")
-  const grid = document.getElementById("journal-grid")
-
-  if (btn && grid) {
-    let loaded = parseInt(btn.dataset.loaded || "0", 10)
-    const increment = parseInt(btn.dataset.increment || "3", 10)
-    const total = parseInt(btn.dataset.total || "0", 10)
-
-    btn.addEventListener("click", () => {
-      const nextTo = Math.min(loaded + increment, total)
-      for (let i = loaded; i < nextTo; i++) {
-        const item = grid.querySelector(`.journal-item[data-idx="${i}"]`)
-        if (item) {
-          item.classList.remove("hidden")
-          requestAnimationFrame(() => {
-            item.classList.add("opacity-100")
-            item.classList.remove("opacity-0")
-          })
-        }
-      }
-      loaded = nextTo
-      const remaining = total - loaded
-      if (remaining > 0) {
-        btn.textContent = `Load more (${remaining} remaining)`
-      } else {
-        btn.remove()
-      }
-    })
-  }
-</script>

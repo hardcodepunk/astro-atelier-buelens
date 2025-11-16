@@ -1,0 +1,23 @@
+---
+// src/components/Hero.astro
+
+interface Props {
+  id?: string
+  title?: string
+  backgroundImage?: string
+}
+
+const { id = "home", title = "", backgroundImage = "" } = Astro.props
+---
+
+<section
+  id={id}
+  class="relative h-screen flex items-center justify-center text-center bg-cover bg-center bg-no-repeat"
+  style={`background-image: url('${backgroundImage}')`}
+>
+  <div class="absolute inset-0 bg-black/30"></div>
+
+  <h1 class="relative z-10 text-lg md:text-3xl font-light text-white">
+    {title}
+  </h1>
+</section>
