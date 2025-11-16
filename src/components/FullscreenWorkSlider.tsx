@@ -43,7 +43,7 @@ export default function FullscreenWorkSlider({ items, autoMs = 4000 }: Props) {
   return (
     <section className="bg-white text-black py-16 px-6 md:px-10">
       <div
-        className="relative mx-auto w-full max-w-6xl aspect-[16/7] overflow-hidden rounded-2xl"
+        className="relative mx-auto w-full max-w-6xl aspect-16/7 overflow-hidden"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
@@ -52,7 +52,7 @@ export default function FullscreenWorkSlider({ items, autoMs = 4000 }: Props) {
           key={active.id}
           src={active.image}
           alt={active.alt || active.title}
-          className="w-full h-full object-cover object-center rounded-2xl"
+          className="w-full h-full object-cover object-center"
         />
 
         {/* Title + button at bottom center */}
@@ -67,7 +67,7 @@ export default function FullscreenWorkSlider({ items, autoMs = 4000 }: Props) {
         </div>
 
         {/* Soft gradient for readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 rounded-2xl pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-black/20  pointer-events-none" />
       </div>
 
       {/* Thumbnails */}
@@ -77,15 +77,11 @@ export default function FullscreenWorkSlider({ items, autoMs = 4000 }: Props) {
           return (
             <button key={it.id} onClick={() => setIndex(i)} className="flex flex-col items-center group">
               <div
-                className={`overflow-hidden rounded-md border transition-all duration-300 ${
+                className={`overflow-hidden border transition-all duration-300 ${
                   activeThumb ? "border-black" : "border-transparent group-hover:border-black/30"
                 }`}
               >
-                <img
-                  src={it.image}
-                  alt={it.alt || it.title}
-                  className="w-20 h-14 md:w-28 md:h-20 object-cover rounded-md"
-                />
+                <img src={it.image} alt={it.alt || it.title} className="w-20 h-14 md:w-28 md:h-20 object-cover" />
               </div>
               <span
                 className={`mt-2 text-[10px] md:text-xs uppercase tracking-widest ${
