@@ -88,9 +88,22 @@ const sliderItems = works
                   {data.city ? `, ${data.city}` : ""}
                 </p>
               </div>
+
               <div class="text-sm">
-                {new Date(data.start).toLocaleDateString()}
-                {data.end ? ` – ${new Date(data.end).toLocaleDateString()}` : ""}
+                {(() => {
+                  const format = (d: string | number | Date) => {
+                    const date = new Date(d)
+                    const day = String(date.getDate()).padStart(2, "0")
+                    const month = String(date.getMonth() + 1).padStart(2, "0")
+                    const year = date.getFullYear()
+                    return `${day}.${month}.${year}`
+                  }
+
+                  const start = format(data.start)
+                  const end = data.end ? ` – ${format(data.end)}` : ""
+
+                  return `${start}${end}`
+                })()}
               </div>
             </li>
           ))}
