@@ -4,6 +4,9 @@ import { getCollection, type CollectionEntry } from "astro:content"
 import Quote from "../components/Quote.astro"
 import FullscreenWorkSlider from "../components/FullscreenWorkSlider.tsx"
 import JournalList from "../components/JournalList.astro"
+import Hero from "../components/Hero.astro"
+import { sanityClient } from "../utils/sanityClient"
+import { urlFor } from "../utils/sanityImage"
 
 type WorkEntry = CollectionEntry<"works">
 type ExhibitionEntry = CollectionEntry<"exhibitions">
@@ -22,20 +25,25 @@ const sliderItems = works
     image: w.data.cover,
     href: `/works/${w.slug}`,
   }))
+
+const heroData = await sanityClient.fetch(`
+  *[_type == "hero"][0]{
+    title,
+    backgroundImage
+  }
+`)
+
+const heroTitle = heroData?.title ?? "Minimal furniture, built with precision."
+const heroBackgroundImage = heroData?.backgroundImage
+  ? urlFor(heroData.backgroundImage).width(1800).url()
+  : "/works/ramp-coffee/01.jpg"
 ---
 
 <BaseLayout title="Atelier Buelens">
-  <!-- HERO (kept) -->
-  <section
-    id="home"
-    class="relative h-screen flex items-center justify-center text-center bg-cover bg-center bg-no-repeat"
-    style="background-image: url('/works/ramp-coffee/01.jpg');"
-  >
-    <div class="absolute inset-0 bg-black/30"></div>
-    <h1 class="relative z-10 text-lg md:text-3xl font-light text-white">Minimal furniture, built with precision.</h1>
-  </section>
+  <!-- HERO -->
+  <Hero id="home" title={heroTitle} backgroundImage={heroBackgroundImage} />
 
-  <!-- WORKS: slider only -->
+  <!-- WORKS -->
   <section id="works" class="scroll-mt-24">
     {
       sliderItems.length > 0 ? (
