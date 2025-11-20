@@ -26,14 +26,15 @@ const isHome = Astro.url.pathname === "/"
       />
     </a>
 
-
     {/* Desktop */}
     <nav class="hidden md:flex items-center gap-8 text-sm font-light tracking-wide">
-      {nav.map(item => (
-        <a href={item.href} class="hover:opacity-60 transition-opacity">
-          {item.label}
-        </a>
-      ))}
+      {
+        nav.map(item => (
+          <a href={item.href} class="hover:opacity-60 transition-opacity">
+            {item.label}
+          </a>
+        ))
+      }
     </nav>
 
     {/* Mobile button */}
@@ -56,56 +57,61 @@ const isHome = Astro.url.pathname === "/"
         text-2xl font-light tracking-wide bg-white text-black
         opacity-0 pointer-events-none transition-opacity duration-300"
     >
-      {nav.map(item => (
-        <a href={item.href} class="hover:opacity-60 transition-opacity">
-          {item.label}
-        </a>
-      ))}
+      {
+        nav.map(item => (
+          <a href={item.href} class="hover:opacity-60 transition-opacity">
+            {item.label}
+          </a>
+        ))
+      }
     </div>
   </div>
 </header>
 
-{isHome && (
-  <script>
-    import { initHeaderScroll } from "../utils/headerScroll"
+{
+  isHome && (
+    <script>
+      import {initHeaderScroll} from "../utils/headerScroll" window.addEventListener("DOMContentLoaded", () =>{" "}
+      {initHeaderScroll()})
+    </script>
+  )
+}
 
-    window.addEventListener("DOMContentLoaded", () => {
-      initHeaderScroll()
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("menu-toggle")
+    const menu = document.getElementById("mobile-menu")
+    if (!btn || !menu) return
 
-      const btn = document.getElementById("menu-toggle")
-      const menu = document.getElementById("mobile-menu")
-      if (!btn || !menu) return
+    const openMenu = () => {
+      btn.classList.add("open")
+      btn.setAttribute("aria-expanded", "true")
+      menu.classList.remove("opacity-0", "pointer-events-none")
+      menu.classList.add("opacity-100", "pointer-events-auto")
+      document.documentElement.classList.add("overflow-hidden")
+    }
 
-      const openMenu = () => {
-        btn.classList.add("open")
-        btn.setAttribute("aria-expanded", "true")
-        menu.classList.remove("opacity-0", "pointer-events-none")
-        menu.classList.add("opacity-100", "pointer-events-auto")
-        document.documentElement.classList.add("overflow-hidden")
-      }
+    const closeMenu = () => {
+      btn.classList.remove("open")
+      btn.setAttribute("aria-expanded", "false")
+      menu.classList.remove("opacity-100", "pointer-events-auto")
+      menu.classList.add("opacity-0", "pointer-events-none")
+      document.documentElement.classList.remove("overflow-hidden")
+    }
 
-      const closeMenu = () => {
-        btn.classList.remove("open")
-        btn.setAttribute("aria-expanded", "false")
-        menu.classList.remove("opacity-100", "pointer-events-auto")
-        menu.classList.add("opacity-0", "pointer-events-none")
-        document.documentElement.classList.remove("overflow-hidden")
-      }
-
-      btn.addEventListener("click", () => {
-        const isOpen = btn.classList.contains("open")
-        isOpen ? closeMenu() : openMenu()
-      })
-
-      menu.addEventListener("click", (e) => {
-        const target = e.target
-        if (target instanceof HTMLElement && target.tagName === "A") {
-          closeMenu()
-        }
-      })
+    btn.addEventListener("click", () => {
+      const isOpen = btn.classList.contains("open")
+      isOpen ? closeMenu() : openMenu()
     })
-  </script>
-)}
+
+    menu.addEventListener("click", e => {
+      const target = e.target
+      if (target instanceof HTMLElement && target.tagName === "A") {
+        closeMenu()
+      }
+    })
+  })
+</script>
 
 <style>
   #site-header .header-logo {
@@ -145,6 +151,9 @@ const isHome = Astro.url.pathname === "/"
   }
 
   .bar {
-    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease,
+      background-color 0.3s ease;
   }
 </style>
