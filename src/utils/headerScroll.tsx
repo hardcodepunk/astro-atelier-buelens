@@ -1,38 +1,40 @@
 export function initHeaderScroll(): void {
   if (typeof window === "undefined") return
 
-  window.addEventListener("DOMContentLoaded", () => {
-    const header = document.getElementById("site-header") as HTMLElement | null
-    if (!header) return
+  const header = document.getElementById("site-header")
+  if (!header) return
 
-    let lastScrollY = 0
+  let last = window.scrollY
 
-    const setTopState = () => {
-      header.classList.remove("bg-white", "text-black", "header-solid")
-      header.classList.add("text-white")
-      header.style.transform = "translateY(0)"
+  const setTop = () => {
+    header.classList.remove("header-solid", "bg-white", "text-black")
+    header.classList.add("text-white")
+    header.style.transform = "translateY(0)"
+  }
+
+  const setSolid = () => {
+    header.classList.add("header-solid", "bg-white", "text-black")
+    header.classList.remove("text-white")
+    header.style.transform = "translateY(0)"
+  }
+
+  if (window.scrollY === 0) {
+    setTop()
+  } else {
+    setSolid()
+  }
+
+  window.addEventListener("scroll", () => {
+    const y = window.scrollY
+
+    if (y === 0) {
+      setTop()
+    } else if (y > last) {
+      header.style.transform = "translateY(-100%)"
+    } else {
+      setSolid()
     }
 
-    const setSolidState = () => {
-      header.classList.add("bg-white", "text-black", "header-solid")
-      header.classList.remove("text-white")
-      header.style.transform = "translateY(0)"
-    }
-
-    window.addEventListener("scroll", () => {
-      const y = window.scrollY
-
-      if (y <= 0) {
-        setTopState()
-      } else if (y > lastScrollY) {
-        // scrolling down → hide header
-        header.style.transform = "translateY(-100%)"
-      } else {
-        // scrolling up → show solid header
-        setSolidState()
-      }
-
-      lastScrollY = y
-    })
+    last = y
   })
 }
