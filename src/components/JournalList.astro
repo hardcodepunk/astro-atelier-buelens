@@ -12,8 +12,8 @@ const entries = await sanityClient.fetch(`
   }
 `)
 
-function formatDate(d: string | number | Date) {
-  const date = new Date(d)
+function formatDate(value: string | number | Date) {
+  const date = new Date(value)
   const day = String(date.getDate()).padStart(2, "0")
   const month = String(date.getMonth() + 1).padStart(2, "0")
   const year = date.getFullYear()
@@ -21,30 +21,30 @@ function formatDate(d: string | number | Date) {
 }
 ---
 
-<section id="journal" class="mx-auto max-w-6xl px-6 pt-28 pb-20">
-  <h2 class="text-xl mb-6">Journal</h2>
+{
+  entries.length > 0 && (
+    <section id="journal" class="mx-auto max-w-6xl px-6 pt-28 pb-20">
+      <h2 class="text-xl mb-6">Journal</h2>
 
-  {
-    entries.length > 0 ? (
-      <ul class="space-y-8">
-        {entries.map((entry: { slug: { current: any }; cover: any; title: unknown; date: any }) => (
-          <li class="flex flex-col gap-2">
-            <a href={`/journal/${entry.slug.current}`} class="group">
+      <ul class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        {entries.map((entry: any) => (
+          <li>
+            <a href={`/journal/${entry.slug.current}`} class="group block">
               {entry.cover && (
                 <img
-                  src={urlFor(entry.cover).width(1200).url()}
+                  src={urlFor(entry.cover).width(800).url()}
                   alt={entry.title}
-                  class="w-full h-auto object-cover mb-4"
+                  class="w-full h-auto object-cover mb-4 transition-opacity group-hover:opacity-60"
                 />
               )}
-              <h3 class="text-lg font-light group-hover:opacity-60 transition">{entry.title}</h3>
+
+              <h3 class="text-lg font-light tracking-tight transition group-hover:opacity-60">{entry.title}</h3>
             </a>
-            <p class="text-sm opacity-70">{formatDate(entry.date)}</p>
+
+            <p class="text-sm opacity-70 mt-1">{formatDate(entry.date)}</p>
           </li>
         ))}
       </ul>
-    ) : (
-      <p class="opacity-60">Journal entries coming soon.</p>
-    )
-  }
-</section>
+    </section>
+  )
+}

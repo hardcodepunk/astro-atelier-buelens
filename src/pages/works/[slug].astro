@@ -1,0 +1,180 @@
+---
+import FullscreenWorkSlider from "../../components/FullscreenWorkSlider"
+import BaseLayout from "../../layouts/BaseLayout.astro"
+import { sanityClient } from "../../utils/sanityClient"
+import { urlFor } from "../../utils/sanityImage"
+import { toHTML } from "@portabletext/to-html"
+
+interface WorkSlug {
+  slug: string
+}
+
+export async function getStaticPaths() {
+  const works = await sanityClient.fetch<WorkSlug[]>(`
+    *[_type == "work" && defined(slug.current)]{
+      "slug": slug.current
+    }
+  `)
+
+  return works.map(w => ({
+    params: { slug: w.slug },
+  }))
+}
+
+const { slug } = Astro.params
+
+const work = await sanityClient.fetch(
+  `
+    *[_type == "work" && slug.current == $slug][0]{
+      title,
+      year,
+      materials,
+      dimensions,
+      weight,
+      price,
+      photographer,
+      cover,
+      gallery,
+      description
+    }
+  `,
+  { slug }
+)
+
+if (!work) {
+  throw new Error("Work not found for slug " + slug)
+}
+
+const pageTitle = work.title + " - Atelier Buelens"
+const metaDescription = work.materials || work.dimensions || "Furniture exploring tension and balance."
+
+const descriptionHtml = work.description ? toHTML(work.description) : ""
+
+// Fetch all other works for bottom slider
+const otherWorks = await sanityClient.fetch(
+  `
+    *[_type == "work"] | order(order asc, title asc) {
+      _id,
+      title,
+      "slug": slug.current,
+      cover
+    }
+  `
+)
+
+const sliderItems = otherWorks
+  .filter((w: any) => w.slug !== slug)
+  .filter((w: any) => !!w.cover)
+  .map((w: any) => ({
+    id: w._id,
+    title: w.title,
+    image: urlFor(w.cover).width(1600).url(),
+    href: "/works/" + w.slug,
+  }))
+---
+
+<BaseLayout title={pageTitle} description={metaDescription}>
+  <main class="max-w-6xl mx-auto px-6 py-32">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
+      <section class="space-y-6 lg:col-span-2">
+        {
+          work.cover && (
+            <figure>
+              <img
+                src={urlFor(work.cover).width(1600).url()}
+                alt={work.title}
+                class="w-full h-auto object-cover"
+                loading="lazy"
+              />
+            </figure>
+          )
+        }
+
+        {
+          work.gallery && work.gallery.length > 0 && (
+            <>
+              {work.gallery.map((img: any, i: number) => (
+                <figure>
+                  <img
+                    src={urlFor(img).width(1600).url()}
+                    alt={work.title + " - image " + (i + 1)}
+                    class="w-full h-auto object-cover"
+                    loading="lazy"
+                  />
+                </figure>
+              ))}
+            </>
+          )
+        }
+      </section>
+
+      <aside class="space-y-6 text-sm leading-relaxed lg:col-span-1">
+        <header>
+          <h1 class="text-base md:text-lg font-semibold tracking-wide">
+            {work.title}
+            {work.year && " - " + work.year}
+          </h1>
+        </header>
+
+        <div class="space-y-1">
+          {
+            work.materials && (
+              <p>
+                <span class="font-semibold">Materials: </span>
+                {work.materials}
+              </p>
+            )
+          }
+          {
+            work.dimensions && (
+              <p>
+                <span class="font-semibold">Dimensions: </span>
+                {work.dimensions}
+              </p>
+            )
+          }
+          {
+            work.weight && (
+              <p>
+                <span class="font-semibold">Weight: </span>
+                {work.weight}
+              </p>
+            )
+          }
+          {
+            work.price && (
+              <p>
+                <span class="font-semibold">Price: </span>
+                {work.price}
+              </p>
+            )
+          }
+          {
+            work.photographer && (
+              <p class="opacity-70">
+                <span class="font-semibold">Photography: </span>
+                {work.photographer}
+              </p>
+            )
+          }
+        </div>
+
+        {
+          descriptionHtml && (
+            <div class="pt-4 border-t border-black/10">
+              <div class="prose prose-sm max-w-none" set:html={descriptionHtml} />
+            </div>
+          )
+        }
+      </aside>
+    </div>
+  </main>
+
+  {
+    sliderItems.length > 0 && (
+      <section class="mt-20">
+        <FullscreenWorkSlider client:load items={sliderItems} autoMs={4000} />
+      </section>
+    )
+  }
+</BaseLayout>

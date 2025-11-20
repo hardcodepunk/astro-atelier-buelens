@@ -1,29 +1,33 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro"
-import { getCollection, type CollectionEntry } from "astro:content"
+import Hero from "../components/Hero.astro"
 import Quote from "../components/Quote.astro"
 import FullscreenWorkSlider from "../components/FullscreenWorkSlider.tsx"
 import JournalList from "../components/JournalList.astro"
-import Hero from "../components/Hero.astro"
+import Exhibitions from "../components/Exhibitions.astro"
+import About from "../components/About.astro"
+
 import { sanityClient } from "../utils/sanityClient"
 import { urlFor } from "../utils/sanityImage"
 
-type WorkEntry = CollectionEntry<"works">
-type ExhibitionEntry = CollectionEntry<"exhibitions">
-
-const works: WorkEntry[] = (await getCollection("works")).sort(
-  (a: WorkEntry, b: WorkEntry) => (a.data.order ?? 0) - (b.data.order ?? 0)
+const works = await sanityClient.fetch(
+  `
+    *[_type == "work"] | order(order asc, title asc) {
+      _id,
+      title,
+      "slug": slug.current,
+      cover
+    }
+  `
 )
 
-const exhibitions: ExhibitionEntry[] = await getCollection("exhibitions")
-
 const sliderItems = works
-  .filter(w => !!w.data.cover)
-  .map(w => ({
-    id: w.slug,
-    title: w.data.title,
-    image: w.data.cover,
-    href: `/works/${w.slug}`,
+  .filter((w: any) => !!w.cover)
+  .map((w: any) => ({
+    id: w._id,
+    title: w.title,
+    image: urlFor(w.cover).width(1600).url(),
+    href: "/works/" + w.slug,
   }))
 
 const heroData = await sanityClient.fetch(`
@@ -56,72 +60,10 @@ const heroBackgroundImage = heroData?.backgroundImage
     }
   </section>
 
-  <!-- ABOUT -->
-  <section id="about" class="mx-auto max-w-6xl px-6 pt-28 pb-20 scroll-mt-24">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
-      <img
-        src="/about/portrait.jpg"
-        alt="Portrait"
-        class="w-full h-auto object-cover"
-        loading="lazy"
-        decoding="async"
-      />
-      <div>
-        <p class="leading-relaxed mb-6">
-          My work combines craftsmanship with my background as an engineer. It begins with a pure geometric form;
-          materials are brought together in a way that balances aesthetics and functionality. Sketches, strength
-          calculations, and simulations are part of the process. During production, I oversee the woodwork, while the
-          steelwork is outsourced.
-        </p>
-      </div>
-    </div>
-  </section>
+  <About />
 
-  <!-- QUOTE -->
   <Quote />
-
-  <!-- EXHIBITIONS -->
-  <section id="exhibitions" class="mx-auto max-w-3xl px-6 pt-28 pb-16 scroll-mt-24">
-    <h2 class="text-xl mb-4">Exhibitions</h2>
-
-    {
-      exhibitions.length > 0 ? (
-        <ul class="space-y-2">
-          {exhibitions.map(({ data }: { data: ExhibitionEntry["data"] }) => (
-            <li class="flex items-baseline justify-between border-b py-3">
-              <div>
-                <p>{data.title}</p>
-                <p class="text-sm opacity-80">
-                  {data.venue}
-                  {data.city ? `, ${data.city}` : ""}
-                </p>
-              </div>
-
-              <div class="text-sm">
-                {(() => {
-                  const format = (d: string | number | Date) => {
-                    const date = new Date(d)
-                    const day = String(date.getDate()).padStart(2, "0")
-                    const month = String(date.getMonth() + 1).padStart(2, "0")
-                    const year = date.getFullYear()
-                    return `${day}.${month}.${year}`
-                  }
-
-                  const start = format(data.start)
-                  const end = data.end ? ` – ${format(data.end)}` : ""
-
-                  return `${start}${end}`
-                })()}
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="opacity-60">Exhibitions coming soon.</p>
-      )
-    }
-  </section>
-
+  <Exhibitions />
   <JournalList />
 
   <!-- CONTACT (centered, no title) -->
@@ -138,8 +80,6 @@ const heroBackgroundImage = heroData?.backgroundImage
           info@atelierbuelens.com
         </a>
       </p>
-      <p>+32 47 837 18 88</p>
-      <p>Azalealaan 37<br />1030&nbsp;Brussel</p>
     </div>
   </section>
 </BaseLayout>

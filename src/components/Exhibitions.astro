@@ -1,0 +1,61 @@
+---
+import { sanityClient } from "../utils/sanityClient"
+
+interface Exhibition {
+  title: string
+  venue?: string
+  city?: string
+  start: string
+  end?: string
+}
+
+const exhibitions = await sanityClient.fetch<Exhibition[]>(`
+  *[_type == "exhibition"] | order(start desc) {
+    title,
+    venue,
+    city,
+    start,
+    end
+  }
+`)
+
+const formatDate = (value: string) => {
+  const date = new Date(value)
+  const day = String(date.getDate()).padStart(2, "0")
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const year = date.getFullYear()
+  return `${day}.${month}.${year}`
+}
+---
+
+<section id="exhibitions" class="mx-auto max-w-3xl px-6 pt-28 pb-16 scroll-mt-24">
+  <h2 class="text-xl mb-4">Exhibitions</h2>
+
+  {
+    exhibitions.length > 0 ? (
+      <ul class="space-y-2">
+        {exhibitions.map(exhibition => (
+          <li class="flex items-baseline justify-between border-b py-3">
+            <div>
+              <p>{exhibition.title}</p>
+              <p class="text-sm opacity-80">
+                {exhibition.venue}
+                {exhibition.city ? `, ${exhibition.city}` : ""}
+              </p>
+            </div>
+
+            <div class="text-sm">
+              {(() => {
+                const start = exhibition.start ? formatDate(exhibition.start) : ""
+                const end = exhibition.end ? " - " + formatDate(exhibition.end) : ""
+                return `${start}${end}`
+              })()}
+            </div>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="opacity-60">Exhibitions coming soon.</p>
+    )
+  }
+</section>

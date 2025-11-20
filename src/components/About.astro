@@ -1,0 +1,27 @@
+---
+import { sanityClient } from "../utils/sanityClient"
+import { urlFor } from "../utils/sanityImage"
+import { toHTML } from "@portabletext/to-html"
+
+const about = await sanityClient.fetch(`
+  *[_type == "about"][0]{
+    portrait,
+    text
+  }
+`)
+
+const portraitUrl = about?.portrait ? urlFor(about.portrait).width(1200).url() : null
+const html = about?.text ? toHTML(about.text) : ""
+---
+
+<section id="about" class="mx-auto max-w-6xl px-6 pt-28 pb-20 scroll-mt-24">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+    {
+      portraitUrl && (
+        <img src={portraitUrl} alt="Portrait" class="w-full h-auto object-cover" loading="lazy" decoding="async" />
+      )
+    }
+
+    <div class="prose prose-invert leading-relaxed" set:html={html} />
+  </div>
+</section>
