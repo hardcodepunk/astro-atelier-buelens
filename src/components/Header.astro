@@ -11,6 +11,7 @@ const isHome = Astro.url.pathname === "/"
 
 <header
   id="site-header"
+  data-home={isHome ? "true" : "false"}
   class={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
     isHome ? "text-white" : "bg-white text-black header-solid"
   }`}
@@ -26,7 +27,6 @@ const isHome = Astro.url.pathname === "/"
       />
     </a>
 
-    {/* Desktop */}
     <nav class="hidden md:flex items-center gap-8 text-sm font-light tracking-wide">
       {
         nav.map(item => (
@@ -37,7 +37,6 @@ const isHome = Astro.url.pathname === "/"
       }
     </nav>
 
-    {/* Mobile button */}
     <button
       id="menu-toggle"
       class="md:hidden relative z-50 w-6 h-5 flex flex-col justify-between focus:outline-none"
@@ -50,7 +49,6 @@ const isHome = Astro.url.pathname === "/"
       <span class="bar block w-6 h-0.5 transition-all duration-300 origin-center"></span>
     </button>
 
-    {/* Mobile overlay */}
     <div
       id="mobile-menu"
       class="fixed inset-0 h-screen z-40 flex flex-col items-center justify-center gap-10
@@ -68,17 +66,47 @@ const isHome = Astro.url.pathname === "/"
   </div>
 </header>
 
-{
-  isHome && (
-    <script>
-      import {initHeaderScroll} from "../utils/headerScroll" window.addEventListener("DOMContentLoaded", () =>{" "}
-      {initHeaderScroll()})
-    </script>
-  )
-}
-
 <script>
   window.addEventListener("DOMContentLoaded", () => {
+    const header = document.getElementById("site-header")
+    const isHomeHeader = header && header.dataset.home === "true"
+
+    if (isHomeHeader && header) {
+      let last = window.scrollY
+
+      const setTop = () => {
+        header.classList.remove("header-solid", "bg-white", "text-black")
+        header.classList.add("text-white")
+        header.style.transform = "translateY(0)"
+      }
+
+      const setSolid = () => {
+        header.classList.add("header-solid", "bg-white", "text-black")
+        header.classList.remove("text-white")
+        header.style.transform = "translateY(0)"
+      }
+
+      if (window.scrollY <= 0) {
+        setTop()
+      } else {
+        setSolid()
+      }
+
+      window.addEventListener("scroll", () => {
+        const y = window.scrollY
+
+        if (y <= 0) {
+          setTop()
+        } else if (y > last) {
+          header.style.transform = "translateY(-100%)"
+        } else {
+          setSolid()
+        }
+
+        last = y
+      })
+    }
+
     const btn = document.getElementById("menu-toggle")
     const menu = document.getElementById("mobile-menu")
     if (!btn || !menu) return
@@ -101,12 +129,16 @@ const isHome = Astro.url.pathname === "/"
 
     btn.addEventListener("click", () => {
       const isOpen = btn.classList.contains("open")
-      isOpen ? closeMenu() : openMenu()
+      if (isOpen) {
+        closeMenu()
+      } else {
+        openMenu()
+      }
     })
 
     menu.addEventListener("click", e => {
-      const target = e.target
-      if (target instanceof HTMLElement && target.tagName === "A") {
+      const el = e.target
+      if (el instanceof HTMLElement && el.tagName === "A") {
         closeMenu()
       }
     })

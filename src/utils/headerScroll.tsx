@@ -18,7 +18,7 @@ export function initHeaderScroll(): void {
     header.style.transform = "translateY(0)"
   }
 
-  if (window.scrollY === 0) {
+  if (window.scrollY <= 0) {
     setTop()
   } else {
     setSolid()
@@ -27,7 +27,7 @@ export function initHeaderScroll(): void {
   window.addEventListener("scroll", () => {
     const y = window.scrollY
 
-    if (y === 0) {
+    if (y <= 0) {
       setTop()
     } else if (y > last) {
       header.style.transform = "translateY(-100%)"
